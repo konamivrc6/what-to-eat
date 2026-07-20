@@ -90,7 +90,7 @@ def save_history(history: list[dict]) -> None:
 
 # ── prompt 构造 ───────────────────────────────────────
 
-def build_prompt(constraints: list[str], recent: list[str]) -> str:
+def build_prompt(constraints: list[str], recent: list[str], extra: str | None) -> str:
     now = datetime.now()
     weekday = ["周一", "周二", "周三", "周四", "周五", "周六", "周日"][now.weekday()]
     hour = now.hour
@@ -111,6 +111,8 @@ def build_prompt(constraints: list[str], recent: list[str]) -> str:
         f"请以{flavor}的语气，根据以下条件推荐一样具体的食物（要具体到菜品名，不要说笼统的分类）：",
         *(f"- {c}" for c in constraints),
     ]
+    if extra:
+        lines.append(f"附加要求：{extra}")
     if recent:
         lines.append(
             f"注意：最近已经吃过/被推荐过这些：{'、'.join(recent)}，请务必推荐不一样的。"
@@ -130,8 +132,8 @@ def parse_result(text: str) -> str | None:
 
 # ── 单次推荐 ──────────────────────────────────────────
 
-def recommend(client: OpenAI) -> None:
-    """执行一次推荐并打印结果。"""
+def recommend(client: OpenAI, extra: str | None) -> None:
+    """执行一次推荐并打印结果。extra 为用户附加要求。"""
 
     # 1. 随机抽 2-3 个约束
     constraints = random.sample(CONSTRAINTS, k=random.randint(2, 3))
@@ -141,7 +143,7 @@ def recommend(client: OpenAI) -> None:
     recent = [h["food"] for h in history[-7:]]
 
     # 3. 构造 prompt
-    prompt = build_prompt(constraints, recent)
+    prompt = build_prompt(constraints, recent, extra)
 
     print(f"\n约束: {' | '.join(constraints)}")
     print("思考中...", flush=True)
@@ -185,14 +187,14 @@ def main():
     client = OpenAI(api_key=api_key, base_url=BASE_URL)
 
     print("=== what-to-eat ===")
-    print("按回车获取推荐，输入 q 退出")
+    print("按回车获取推荐，输入附加要求后回车，输入 q 退出")
 
     while True:
         cmd = input().strip()
         if cmd.lower() == "q":
             print("再见！")
             break
-        recommend(client)
+        recommend(client, cmd if cmd else None)
 
 
 if __name__ == "__main__":
