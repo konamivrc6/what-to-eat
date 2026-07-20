@@ -128,11 +128,10 @@ def parse_result(text: str) -> str | None:
     return match.group(1).strip() if match else None
 
 
-# ── 主流程 ─────────────────────────────────────────────
+# ── 单次推荐 ──────────────────────────────────────────
 
-def main():
-    api_key = load_api_key()
-    client = OpenAI(api_key=api_key, base_url=BASE_URL)
+def recommend(client: OpenAI) -> None:
+    """执行一次推荐并打印结果。"""
 
     # 1. 随机抽 2-3 个约束
     constraints = random.sample(CONSTRAINTS, k=random.randint(2, 3))
@@ -144,7 +143,7 @@ def main():
     # 3. 构造 prompt
     prompt = build_prompt(constraints, recent)
 
-    print(f"约束: {' | '.join(constraints)}")
+    print(f"\n约束: {' | '.join(constraints)}")
     print("思考中...", flush=True)
 
     # 4. 调用 DeepSeek V4 Pro（思考模式）
@@ -177,6 +176,23 @@ def main():
         save_history(history)
     else:
         print(f"未能解析推荐结果，原始回复：\n{answer}")
+
+
+# ── 主流程 ─────────────────────────────────────────────
+
+def main():
+    api_key = load_api_key()
+    client = OpenAI(api_key=api_key, base_url=BASE_URL)
+
+    print("=== what-to-eat ===")
+    print("按回车获取推荐，输入 q 退出")
+
+    while True:
+        cmd = input().strip()
+        if cmd.lower() == "q":
+            print("再见！")
+            break
+        recommend(client)
 
 
 if __name__ == "__main__":
