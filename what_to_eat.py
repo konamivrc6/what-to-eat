@@ -7,7 +7,6 @@ what-to-eat — 帮你决定这顿吃什么。
 """
 
 import json
-import os
 import random
 import re
 import sys
@@ -20,7 +19,9 @@ from openai import OpenAI
 
 MODEL = "deepseek-v4-pro"
 BASE_URL = "https://api.deepseek.com"
-HISTORY_FILE = Path(__file__).parent / "history.json"
+SCRIPT_DIR = Path(__file__).parent
+API_KEY_FILE = SCRIPT_DIR / "apikey.txt"
+HISTORY_FILE = SCRIPT_DIR / "history.json"
 HISTORY_KEEP = 30
 
 # ── 随机约束池 ────────────────────────────────────────
@@ -43,6 +44,20 @@ CONSTRAINTS = [
     # 猎奇维度
     "平时不常吃的", "异国料理",
 ]
+
+def load_api_key() -> str:
+    """从脚本同目录下的 apikey.txt 读取 API Key。"""
+    if not API_KEY_FILE.exists():
+        sys.exit(
+            f"错误：未找到 API Key 文件。\n"
+            f"请在 {API_KEY_FILE} 中写入你的 DeepSeek API Key。\n"
+            f"获取 Key：https://platform.deepseek.com/api_keys"
+        )
+    key = API_KEY_FILE.read_text(encoding="utf-8").strip()
+    if not key:
+        sys.exit(f"错误：{API_KEY_FILE} 内容为空，请填入 API Key。")
+    return key
+
 
 # ── 历史缓存（模块级，避免重复读文件） ────────────────
 
@@ -116,10 +131,7 @@ def parse_result(text: str) -> str | None:
 # ── 主流程 ─────────────────────────────────────────────
 
 def main():
-    api_key = os.environ.get("DEEPSEEK_API_KEY")
-    if not api_key:
-        sys.exit("错误：请先设置环境变量 DEEPSEEK_API_KEY")
-
+    api_key = load_api_key()
     client = OpenAI(api_key=api_key, base_url=BASE_URL)
 
     # 1. 随机抽 2-3 个约束
