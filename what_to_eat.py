@@ -190,7 +190,7 @@ def main():
     print("按回车获取推荐，输入附加要求后回车，输入 q 退出")
 
     while True:
-        cmd = input().strip()
+        cmd = input("> ").strip()
         if cmd.lower() == "q":
             print("再见！")
             break
