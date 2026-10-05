@@ -2,7 +2,7 @@
 """
 what-to-eat — 帮你决定这顿吃什么。
 
-每次调用 DeepSeek V4 Pro（思考模式），通过随机约束 + 日期时间 + 历史去重
+每次调用 DeepSeek Flash（思考模式），通过随机约束 + 日期时间 + 历史去重
 让模型给出不同的推荐。输出格式为 [食物名称]，脚本解析后显示。
 """
 
@@ -17,7 +17,7 @@ from openai import OpenAI
 
 # ── 配置 ──────────────────────────────────────────────
 
-MODEL = "deepseek-v4-pro"
+MODEL = "deepseek-flash"
 BASE_URL = "https://api.deepseek.com"
 SCRIPT_DIR = Path(__file__).parent
 API_KEY_FILE = SCRIPT_DIR / "apikey.txt"
@@ -148,7 +148,7 @@ def recommend(client: OpenAI, extra: str | None) -> None:
     print(f"\n约束: {' | '.join(constraints)}")
     print("思考中...", flush=True)
 
-    # 4. 调用 DeepSeek V4 Pro（思考模式）
+    # 4. 调用 DeepSeek Flash（思考模式）
     #    注意 reasoning_effort 现在写在 thinking 对象里，不再是顶层参数
     #    （见 API 文档 create-chat-completion 的参数表）。thinking 不是 OpenAI SDK
     #    认识的字段，直接当关键字参数传会被 SDK 拦下，必须走 extra_body 并入请求体。
