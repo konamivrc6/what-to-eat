@@ -149,11 +149,13 @@ def recommend(client: OpenAI, extra: str | None) -> None:
     print("思考中...", flush=True)
 
     # 4. 调用 DeepSeek V4 Pro（思考模式）
+    #    注意 reasoning_effort 现在写在 thinking 对象里，不再是顶层参数
+    #    （见 API 文档 create-chat-completion 的参数表）。thinking 不是 OpenAI SDK
+    #    认识的字段，直接当关键字参数传会被 SDK 拦下，必须走 extra_body 并入请求体。
     response = client.chat.completions.create(
         model=MODEL,
         messages=[{"role": "user", "content": prompt}],
-        reasoning_effort="high",
-        extra_body={"thinking": {"type": "enabled"}},
+        extra_body={"thinking": {"type": "enabled", "reasoning_effort": "high"}},
     )
 
     answer = response.choices[0].message.content or ""
