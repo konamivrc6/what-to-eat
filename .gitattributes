@@ -1,0 +1,2 @@
+# 全仓库统一以 LF 存储，优先级高于本机 core.autocrlf
+* text=auto eol=lf
